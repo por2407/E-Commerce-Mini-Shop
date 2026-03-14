@@ -12,11 +12,13 @@ import ProductDetail from "./pages/shop/ProductDetail.jsx";
 import Cart from "./pages/shop/Cart.jsx";
 import OrderHistory from "./pages/customer/OrderHistory.jsx";
 import OrderList from "./pages/admin/orders/OrderList.jsx";
+import { AuthProvider } from "./context/AuthContext.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Navigate to="/login" replace />,
+    element: <Navigate to="/home" replace />,
   },
   {
     path: "/login",
@@ -32,11 +34,19 @@ const router = createBrowserRouter([
   },
   {
     path: "/cart",
-    element: <Cart/>,
+    element: (
+      <ProtectedRoute>
+        <Cart />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/history",
-    element: <OrderHistory/>,
+    element: (
+      <ProtectedRoute>
+        <OrderHistory />
+      </ProtectedRoute>
+    ),
   },
   {
    path: "/products/:id",
@@ -44,19 +54,36 @@ const router = createBrowserRouter([
   },
   {
     path: "/admin/products",
-    element: <ProductList />,
+    element: (
+      <ProtectedRoute adminOnly={true}>
+        <ProductList />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/admin/products/add",
-    element: <AddProduct />,
-  },{
+    element: (
+      <ProtectedRoute adminOnly={true}>
+        <AddProduct />
+      </ProtectedRoute>
+    ),
+  },
+  {
     path: "/admin/orders",
-    element: <OrderList />,
+    element: (
+      <ProtectedRoute adminOnly={true}>
+        <OrderList />
+      </ProtectedRoute>
+    ),
   }
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  );
 }
 
 export default App;

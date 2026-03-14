@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { productApi } from "../../../api/product.api.js";
+import AdminNavbar from "../../../components/AdminNavbar.jsx";
 
 export default function ProductList() {
   const navigate = useNavigate();
@@ -42,20 +43,10 @@ export default function ProductList() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-100 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-bold text-indigo-600 text-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-            </svg>
-            MiniShop Admin
-          </div>
-          <button onClick={() => navigate("/home")} className="text-sm text-gray-500 hover:text-indigo-600 transition-colors">← กลับหน้าร้าน</button>
-        </div>
-      </div>
+      <AdminNavbar />
 
       <div className="max-w-6xl mx-auto px-4 py-8">
+
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           <StatCard icon="📦" label="สินค้าทั้งหมด" value={`${products.length} รายการ`} color="indigo" />

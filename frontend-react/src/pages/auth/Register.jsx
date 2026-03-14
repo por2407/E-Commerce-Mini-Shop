@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { authApi } from "../../api/auth.api.js";
 import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Register() {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,19 +19,21 @@ export default function Register() {
       setError("กรุณากรอกข้อมูลให้ครบถ้วน");
       return;
     }
+    
     setLoading(true);
-    try {
-      await authApi.register({ name, email, password });
+    const result = await register(name, email, password);
+    setLoading(false);
+
+    if (result.success) {
       navigate("/login");
-    } catch (err) {
-      setError(err?.response?.data?.message || "สมัครสมาชิกไม่สำเร็จ กรุณาลองใหม่");
-    } finally {
-      setLoading(false);
+    } else {
+      setError(result.message || "สมัครสมาชิกไม่สำเร็จ กรุณาลองใหม่");
     }
   }
 
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-linear-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">

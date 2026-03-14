@@ -2,9 +2,14 @@ import { productApi } from "../../api/product.api.js";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar.jsx";
+import AdminNavbar from "../../components/AdminNavbar.jsx";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Home() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const navigate = useNavigate();
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -23,13 +28,17 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      {isAdmin ? <AdminNavbar /> : <Navbar />}
 
       {/* Hero */}
       <div className="bg-linear-to-r from-indigo-600 to-purple-600 text-white">
         <div className="max-w-6xl mx-auto px-4 py-14 flex flex-col items-center text-center">
-          <h1 className="text-4xl font-extrabold mb-3 tracking-tight">ยินดีต้อนรับสู่ MiniShop 🛍️</h1>
-          <p className="text-indigo-100 text-lg mb-8">สินค้าคุณภาพดี ราคาเป็นมิตร จัดส่งทั่วประเทศ</p>
+          <h1 className="text-4xl font-extrabold mb-3 tracking-tight">
+            {isAdmin ? "แผงควบคุมผู้ดูแลระบบ 🛠️" : "ยินดีต้อนรับสู่ MiniShop 🛍️"}
+          </h1>
+          <p className="text-indigo-100 text-lg mb-8">
+            {isAdmin ? "จัดการสินค้าและออเดอร์ทั้งหมดในที่เดียว" : "สินค้าคุณภาพดี ราคาเป็นมิตร จัดส่งทั่วประเทศ"}
+          </p>
           {/* Search */}
           <div className="w-full max-w-md relative">
             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -93,8 +102,12 @@ export default function Home() {
                       <span className="text-indigo-600 font-bold text-base">฿{product.price.toLocaleString()}</span>
                       <span className="text-xs text-gray-400">เหลือ {product.stock} ชิ้น</span>
                     </div>
-                    <button className="mt-3 w-full py-2 text-sm font-medium bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-600 hover:text-white transition-colors">
-                      ดูรายละเอียด
+                    <button className={`mt-3 w-full py-2 text-sm font-medium rounded-xl transition-colors ${
+                      isAdmin 
+                      ? "bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white"
+                      : "bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white"
+                    }`}>
+                      {isAdmin ? "จัดการ/ดูข้อมูล" : "ดูรายละเอียด"}
                     </button>
                   </div>
                 </div>
@@ -103,6 +116,7 @@ export default function Home() {
           </>
         )}
       </div>
+
     </div>
   );
 }

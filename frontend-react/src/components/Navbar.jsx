@@ -1,14 +1,15 @@
 import { Link, useNavigate } from "react-router-dom";
-import useAuthStore from "../store/authStore.js";
+import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
-  const { user, logout } = useAuthStore();
+  const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   function handleLogout() {
     logout();
     navigate("/login");
   }
+
 
   return (
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-gray-100 shadow-sm">
@@ -29,19 +30,33 @@ export default function Navbar() {
             className="text-sm text-gray-600 hover:text-indigo-600 font-medium transition-colors">
             หน้าแรก
           </Link>
-          <Link to="/cart"
-            className="text-sm text-gray-600 hover:text-indigo-600 font-medium transition-colors">
-            ตะกร้าสินค้า
-          </Link>
-          <Link to="/history"
-            className="text-sm text-gray-600 hover:text-indigo-600 font-medium transition-colors">
-            รายการสั่งซื้อ
-          </Link>
+          
+          {/* ซ่อน ตะกร้า และ ประวัติ สำหรับ Admin */}
+          {user?.role !== "admin" && (
+            <>
+              <Link to="/cart"
+                className="text-sm text-gray-600 hover:text-indigo-600 font-medium transition-colors">
+                ตะกร้าสินค้า
+              </Link>
+              <Link to="/history"
+                className="text-sm text-gray-600 hover:text-indigo-600 font-medium transition-colors">
+                รายการสั่งซื้อ
+              </Link>
+            </>
+          )}
+
           {user?.role === "admin" && (
-            <Link to="/admin/products"
-              className="text-sm text-gray-600 hover:text-indigo-600 font-medium transition-colors">
-              จัดการสินค้า
-            </Link>
+
+            <>
+              <Link to="/admin/products"
+                className="text-sm text-gray-600 hover:text-indigo-600 font-medium transition-colors">
+                จัดการสินค้า
+              </Link>
+              <Link to="/admin/orders"
+                className="text-sm text-gray-600 hover:text-indigo-600 font-medium transition-colors">
+                รายการสั่งซื้อ (Admin)
+              </Link>
+            </>
           )}
         </div>
 

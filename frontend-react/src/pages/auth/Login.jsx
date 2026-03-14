@@ -1,35 +1,46 @@
 import { useState } from "react";
-import { authApi } from "../../api/auth.api.js";
-import { useNavigate, Link } from "react-router-dom";
-import useAuthStore from "../../store/authStore.js";
+import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuthStore();
+  const location = useLocation();
+  const { login } = useAuth();
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Get the redirect path from location state, default to /home
+  const from = location.state?.from?.pathname || "/home";
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-    setLoading(true);
-    try {
-      const res = await authApi.login({
-        email: e.target.email.value,
-        password: e.target.password.value,
-      });
-      login(res.data.user);
-      navigate("/home");
-    } catch (err) {
-      setError(err?.response?.data?.message || "อีเมลหรือรหัสผ่านไม่ถูกต้อง");
-    } finally {
-      setLoading(false);
+    const email = e.target.email.value;
+    const password = e.target.password.value;
+
+    if (!email || !password) {
+      setError("กรุณากรอกข้อมูลให้ครบถ้วน");
+      return;
     }
+
+    const result = await login(email, password);
+    if (result.success) {
+      // ถ้าเป็น Admin ให้ไปหน้าจัดการสินค้า ถ้าเป็น User ให้ไปหน้า Home (หรือหน้าที่ตั้งใจจะไปก่อนหน้า)
+      if (result.user.role === "admin") {
+        navigate("/admin/products", { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
+    } else {
+      setError(result.message || "อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+    }
+
   }
 
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-linear-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">

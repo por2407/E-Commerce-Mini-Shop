@@ -37,7 +37,7 @@ export class OrderService {
   async getOrdersByUser(userId) {
     return await this.orderModel
       .find({ user: userId })
-      .populate("items.product", "name price");
+      .populate("items.product", "name price imageUrl");
   }
 
   async getAllOrders() {
@@ -52,5 +52,13 @@ export class OrderService {
       });
     }
     return result;
+  }
+
+  async updateOrderStatus(orderId, status) {
+    return await this.orderModel.findByIdAndUpdate(
+      orderId,
+      { status },
+      { new: true },
+    );
   }
 }

@@ -11,8 +11,14 @@ export class AuthService {
         if (existingUser) {
             throw new Error('User already exists');
         }
+
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = new this.userModel({ name, email, password: hashedPassword });
+        const user = new this.userModel({ 
+            name, 
+            email, 
+            password: hashedPassword
+        });
+
         const savedUser = await user.save();
         const { password: _, ...safeUser } = savedUser.toObject();
         return safeUser;
@@ -27,10 +33,14 @@ export class AuthService {
         if (!isMatch) {
             throw new Error('Invalid credentials');
         }
+
         const token = jwt.sign({ id: user._id, role: user.role }, cfg.jwtSecret, { expiresIn: '1h' });
         const { password: _, ...safeUser } = user.toObject();
         return { ...safeUser, token };
     }
+
+
+
 
     async getAllUsers() {
         return await this.userModel.find({}, { password: 0 });

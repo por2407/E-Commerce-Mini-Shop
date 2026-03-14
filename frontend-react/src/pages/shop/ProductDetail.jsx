@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { productApi } from "../../api/product.api.js";
 import { useEffect, useState } from "react";
-import useAuthStore from "../../store/authStore.js";
+import { useAuth } from "../../context/AuthContext";
 import Navbar from "../../components/Navbar.jsx";
 import useCartStore from "../../store/cartStore.js";
 
@@ -12,8 +12,10 @@ export default function ProductDetail() {
   const [toast, setToast] = useState(null); // { type: 'success'|'error', msg }
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const { addToCart } = useCartStore();
+
 
   useEffect(() => {
     productApi
@@ -206,8 +208,8 @@ export default function ProductDetail() {
                     </span>
                   </div>
 
-                  {/* Quantity selector */}
-                  {product.stock > 0 && (
+                  {/* Quantity selector (Hidden for Admin) */}
+                  {product.stock > 0 && !isAdmin && (
                     <div className="flex items-center gap-4 mb-6">
                       <span className="text-sm font-medium text-gray-700">
                         จำนวน
@@ -237,7 +239,7 @@ export default function ProductDetail() {
 
                 {/* Total + Action */}
                 <div className="space-y-3">
-                  {product.stock > 0 && (
+                  {product.stock > 0 && !isAdmin && (
                     <div className="flex items-center justify-between py-3 border-t border-gray-100">
                       <span className="text-sm text-gray-500">รวมทั้งหมด</span>
                       <span className="text-xl font-bold text-gray-800">
@@ -245,54 +247,68 @@ export default function ProductDetail() {
                       </span>
                     </div>
                   )}
-                  <button
-                    onClick={handleAddToCart}
-                    disabled={product.stock === 0 || orderLoading}
-                    className="w-full flex items-center justify-center gap-2 py-3 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {orderLoading ? (
-                      <>
-                        <svg
-                          className="w-4 h-4 animate-spin"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
+
+                  {isAdmin ? (
+                    <button
+                      onClick={() => navigate(`/admin/products`)}
+                      className="w-full flex items-center justify-center gap-2 py-3 bg-amber-600 text-white text-sm font-semibold rounded-xl hover:bg-amber-700 active:scale-95 transition-all"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      ไปหน้าจัดการสินค้า
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleAddToCart}
+                      disabled={product.stock === 0 || orderLoading}
+                      className="w-full flex items-center justify-center gap-2 py-3 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {orderLoading ? (
+                        <>
+                          <svg
+                            className="w-4 h-4 animate-spin"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8v8H4z"
+                            />
+                          </svg>
+                          กำลังเพิ่ม...
+                        </>
+                      ) : (
+                        <>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
                             stroke="currentColor"
-                            strokeWidth="4"
-                          />
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8v8H4z"
-                          />
-                        </svg>
-                        กำลังเพิ่ม...
-                      </>
-                    ) : (
-                      <>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="w-4 h-4"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.35 2.7A1 1 0 007 17h10m0 0a2 2 0 100 4 2 2 0 000-4zm-10 0a2 2 0 100 4 2 2 0 000-4z"
-                          />
-                        </svg>
-                        {product.stock === 0 ? "สินค้าหมด" : "เพิ่มลงตะกร้า"}
-                      </>
-                    )}
-                  </button>
+                            strokeWidth={2}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.35 2.7A1 1 0 007 17h10m0 0a2 2 0 100 4 2 2 0 000-4zm-10 0a2 2 0 100 4 2 2 0 000-4z"
+                            />
+                          </svg>
+                          {product.stock === 0 ? "สินค้าหมด" : "เพิ่มลงตะกร้า"}
+                        </>
+                      )}
+                    </button>
+                  )}
+
                   <button
                     onClick={() => navigate(-1)}
                     className="w-full py-2.5 text-sm text-gray-500 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
